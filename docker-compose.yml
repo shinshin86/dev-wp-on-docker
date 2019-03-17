@@ -1,0 +1,43 @@
+version: '3'
+services:
+
+  db:
+    build:
+      context: .
+      dockerfile: DockerfileMysql
+    container_name: 'dev-wp-mysql'
+    ports:
+      - "3306:3306"
+    volumes:
+      - dev_wp_db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    privileged: true
+
+  wordpress:
+    build:
+      context: .
+      dockerfile: DockerfileWp
+    container_name: 'dev-wp'
+    ports:
+      - "80:80"
+    restart: always
+    working_dir: /var/www/html
+    links:
+      - db
+    volumes:
+      - dev_wp_contents/:/var/www/html/
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_PASSWORD: wordpress
+    privileged: true
+
+volumes:
+  dev_wp_db_data:
+    external: true
+  dev_wp_contents:
+    external: true
